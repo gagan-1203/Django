@@ -1,0 +1,326 @@
+1. Setup Your Django Project
+First, create a new Django project and app:
+
+django-admin startproject myproject
+cd myproject
+django-admin startapp myapp
+
+2. Create Models
+Define a custom user model if you need additional fields, otherwise, you can use Django’s built-in User model.
+
+3. Signup Page
+Create a signup form and view:
+
+Python
+
+# forms.py
+from django import forms
+from django.contrib.auth.models import User
+
+class SignUpForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'password']
+
+# views.py
+from django.shortcuts import render, redirect
+from django.contrib.auth import login
+from .forms import SignUpForm
+from django.core.mail import send_mail
+from django.conf import settings
+
+def signup(request):
+    if request.method == 'POST':
+        form = SignUpForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.is_active = False  # Deactivate account till it is confirmed
+            user.save()
+            # Send confirmation email
+            send_mail(
+                'Confirm your email',
+                'Click the link to confirm your email: http://example.com/confirm-email/',
+                settings.DEFAULT_FROM_EMAIL,
+                [user.email],
+                fail_silently=False,
+            )
+            return redirect('login')
+    else:
+        form = SignUpForm()
+    return render(request, 'signup.html', {'form': form})
+AI-generated code. Review and use carefully. More info on FAQ.
+4. Email Confirmation
+Create a view to handle email confirmation:
+
+Python
+
+# views.py
+from django.contrib.auth.models import User
+from django.http import HttpResponse
+
+def confirm_email(request, uidb64, token):
+    try:
+        user = User.objects.get(pk=uidb64)
+        if user and token_generator.check_token(user, token):
+            user.is_active = True
+            user.save()
+            return HttpResponse('Email confirmed, you can now login.')
+        else:
+            return HttpResponse('Invalid confirmation link.')
+    except User.DoesNotExist:
+        return HttpResponse('Invalid user.')
+AI-generated code. Review and use carefully. More info on FAQ.
+5. Login Page
+Create a login form and view:
+
+Python
+
+# views.py
+from django.contrib.auth import authenticate, login
+
+def login_view(request):
+    if request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            if user.is_active:
+                login(request, user)
+                return redirect('profile')
+            else:
+                return HttpResponse('Please confirm your email before logging in.')
+        else:
+            return HttpResponse('Invalid login credentials.')
+    return render(request, 'login.html')
+AI-generated code. Review and use carefully. More info on FAQ.
+6. Profile Page
+Create a profile view:
+
+Python
+
+# views.py
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def profile(request):
+    return render(request, 'profile.html')
+AI-generated code. Review and use carefully. More info on FAQ.
+7. URL Configuration
+Add URL patterns for your views:
+
+Python
+
+# urls.py
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('signup/', views.signup, name='signup'),
+    path('login/', views.login_view, name='login'),
+    path('profile/', views.profile, name='profile'),
+    path('confirm-email/<uidb64>/<token>/', views.confirm_email, name='confirm_email'),
+]
+AI-generated code. Review and use carefully. More info on FAQ.
+8. Templates
+Create templates for signup, login, and profile pages.
+
+9. Email Backend
+Configure your email backend in settings.py:
+
+Python
+
+# settings.py
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.example.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'your-email@example.com'
+EMAIL_HOST_PASSWORD = 'your-email-password'
+DEFAULT_FROM_EMAIL = 'webmaster@example.com'
+AI-generated code. Review and use carefully. More info on FAQ.
+This should give you a good starting point. Let me know if you need more details or help with any specific part!
+
+
+
+
+
+Signup Template (signup.html)
+HTML
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Signup</title>
+</head>
+<body>
+    <h2>Signup</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Signup</button>
+    </form>
+</body>
+</html>
+AI-generated code. Review and use carefully. More info on FAQ.
+Login Template (login.html)
+HTML
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login</title>
+</head>
+<body>
+    <h2>Login</h2>
+    <form method="post">
+        {% csrf_token %}
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username"><br>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password"><br>
+        <button type="submit">Login</button>
+    </form>
+</body>
+</html>
+AI-generated code. Review and use carefully. More info on FAQ.
+Profile Template (profile.html)
+HTML
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Profile</title>
+</head>
+<body>
+    <h2>Profile</h2>
+    <p>Welcome, {{ user.username }}!</p>
+    <p>Email: {{ user.email }}</p>
+    <a href="{% url 'logout' %}">Logout</a>
+</body>
+</html>
+AI-generated code. Review and use carefully. More info on FAQ.
+Email Confirmation Template (confirm_email.html)
+HTML
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Email Confirmation</title>
+</head>
+<body>
+    <h2>Email Confirmation</h2>
+    <p>Thank you for signing up. Please check your email to confirm your account.</p>
+</body>
+</html>
+AI-generated code. Review and use carefully. More info on FAQ.
+These templates are quite basic, but they should give you a good starting point. You can style them further using CSS to match your application’s design. Let me know if you need any more help!
+
+
+
+
+1. Create a Templates Directory
+First, create a directory named templates inside your Django app directory (myapp).
+
+2. Create Template Files
+Inside the templates directory, create the HTML files for each template:
+
+signup.html
+login.html
+profile.html
+confirm_email.html
+3. Update Views to Use Templates
+Modify your views to render these templates. Here’s how you can update your views:
+
+Python
+
+# views.py
+from django.shortcuts import render, redirect
+from django.contrib.auth import login, authenticate
+from .forms import SignUpForm
+from django.core.mail import send_mail
+from django.conf import settings
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+from django.http import HttpResponse
+
+def signup(request):
+    if request.method == 'POST':
+        form = SignUpForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.is_active = False  # Deactivate account till it is confirmed
+            user.save()
+            # Send confirmation email
+            send_mail(
+                'Confirm your email',
+                'Click the link to confirm your email: http://example.com/confirm-email/',
+                settings.DEFAULT_FROM_EMAIL,
+                [user.email],
+                fail_silently=False,
+            )
+            return render(request, 'confirm_email.html')
+    else:
+        form = SignUpForm()
+    return render(request, 'signup.html', {'form': form})
+
+def login_view(request):
+    if request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            if user.is_active:
+                login(request, user)
+                return redirect('profile')
+            else:
+                return HttpResponse('Please confirm your email before logging in.')
+        else:
+            return HttpResponse('Invalid login credentials.')
+    return render(request, 'login.html')
+
+@login_required
+def profile(request):
+    return render(request, 'profile.html')
+
+def confirm_email(request, uidb64, token):
+    try:
+        user = User.objects.get(pk=uidb64)
+        if user and token_generator.check_token(user, token):
+            user.is_active = True
+            user.save()
+            return HttpResponse('Email confirmed, you can now login.')
+        else:
+            return HttpResponse('Invalid confirmation link.')
+    except User.DoesNotExist:
+        return HttpResponse('Invalid user.')
+AI-generated code. Review and use carefully. More info on FAQ.
+4. Configure Template Settings
+Ensure your Django project is configured to find the templates. In your settings.py, add the following:
+
+Python
+
+# settings.py
+import os
+
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [os.path.join(BASE_DIR, 'myapp/templates')],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
+]
+AI-generated code. Review and use carefully. More info on FAQ.
+5. Run Your Server
+Finally, run your Django development server to see the templates in action:
+
+python manage.py runserver
+
+Now, when you navigate to the signup, login, and profile pages, Django will use the templates you created. Let me know if you need any more help!
