@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home-Page</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        .hero {
+            background: url('https://via.placeholder.com/1920x1080') no-repeat center center;
+            background-size: cover;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-align: center;
+        }
+        .hero h1 {
+            font-size: 4em;
+            margin-bottom: 0.5em;
+        }
+        .hero p {
+            font-size: 1.5em;
+        }
+        .features {
+            padding: 50px 0;
+        }
+        .feature {
+            text-align: center;
+            padding: 20px;
+        }
+        .feature img {
+            max-width: 100px;
+            margin-bottom: 20px;
+        }
+        .footer {
+            background-color: #343a40;
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    {% extends 'base.html' %}
+
+    {% block content %}
+
+    <div class="hero">
+        <div>
+            <h1>Welcome to Our Website</h1>
+            <p>Your success is our priority</p>
+            <a href="{% url 'login' %}" class="btn btn-primary btn-lg">Login</a>
+            <a href="{% url 'signup' %}" class="btn btn-primary btn-lg">SignUp</a>
+        </div>
+    </div>
+
+    <div class="features container">
+        <div class="row">
+            <div class="col-md-4 feature">
+                <img src="https://via.placeholder.com/100" alt="Feature 1">
+                <h3>Feature 1</h3>
+                <p>Short description of feature 1.</p>
+            </div>
+            <div class="col-md-4 feature">
+                <img src="https://via.placeholder.com/100" alt="Feature 2">
+                <h3>Feature 2</h3>
+                <p>Short description of feature 2.</p>
+            </div>
+            <div class="col-md-4 feature">
+                <img src="https://via.placeholder.com/100" alt="Feature 3">
+                <h3>Feature 3</h3>
+                <p>Short description of feature 3.</p>
+            </div>
+        </div>
+    </div>
+
+    {% endblock %}
+</body>
+</html>
